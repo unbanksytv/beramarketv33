@@ -1,13 +1,23 @@
 import Layout from 'components/Layout'
 import type { GetStaticProps, InferGetStaticPropsType, NextPage } from 'next'
-import { paths } from '@reservoir0x/reservoir-kit-client'
+import { paths } from '@reservoir0x/reservoir-sdk'
 import setParams from 'lib/params'
 import Head from 'next/head'
 import TrendingCollectionTable from 'components/TrendingCollectionTable'
 import SortTrendingCollections from 'components/SortTrendingCollections'
+import Footer from 'components/Footer'
 import { useMediaQuery } from '@react-hookz/web'
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
+import Image from 'next/image'
+
+const OptimizedImage = () => {
+  return (
+      <p>
+          <Image src="/bongbearsNFT.jpeg" alt="lfg" layout="fill"></Image>
+      </p>
+  )
+}
 
 // Environment variables
 // For more information about these variables
@@ -30,35 +40,9 @@ const COLLECTION_SET_ID = process.env.NEXT_PUBLIC_COLLECTION_SET_ID
 
 type Props = InferGetStaticPropsType<typeof getStaticProps>
 
-const metadata = {
-  title: (title: string) => <title>{title}</title>,
-  description: (description: string) => (
-    <meta name="description" content={description} />
-  ),
-  tagline: (tagline: string | undefined) => (
-    <>{tagline || 'Discover, buy and sell NFTs'}</>
-  ),
-  image: (image?: string) => {
-    if (image) {
-      return (
-        <>
-          <meta name="twitter:image" content={image} />
-          <meta name="og:image" content={image} />
-        </>
-      )
-    }
-    return null
-  },
-}
-
 const Home: NextPage<Props> = ({ fallback }) => {
   const isSmallDevice = useMediaQuery('only screen and (max-width : 600px)')
   const router = useRouter()
-
-  const title = META_TITLE && metadata.title(META_TITLE)
-  const description = META_DESCRIPTION && metadata.description(META_DESCRIPTION)
-  const image = metadata.image(META_IMAGE)
-  const tagline = metadata.tagline(TAGLINE)
 
   useEffect(() => {
     if (REDIRECT_HOMEPAGE && COLLECTION) {
@@ -78,22 +62,25 @@ const Home: NextPage<Props> = ({ fallback }) => {
   return (
     <Layout navbar={{}}>
       <Head>
-        {title}
-        {description}
-        {image}
       </Head>
-      <header className="col-span-full mb-12 mt-[66px] px-4 md:mt-40 lg:px-0">
-        <h1 className="reservoir-h1 text-center dark:text-white">{tagline}</h1>
+      <header>
       </header>
+       <br/>
+      
+       <div className="min-h-screen bg-center bg-cover bg-no-repeat">
+        <img src="bongbearsNFT.jpeg" className="absolute top-0 left-0 w-full h-full object-cover blur-image-on-load" alt="Background"/>
+      </div>
+
       <div className="col-span-full px-6 md:px-16">
         <div className="mb-9 flex w-full items-center justify-between">
           <div className="reservoir-h4 dark:text-white">
-            Trending Collections
+            Curated Top 33 Ranked by Daily Volume
           </div>
           {!isSmallDevice && <SortTrendingCollections />}
         </div>
         <TrendingCollectionTable fallback={fallback} />
       </div>
+      <Footer />
     </Layout>
   )
 }
@@ -118,6 +105,7 @@ export const getStaticProps: GetStaticProps<{
   let query: paths['/collections/v5']['get']['parameters']['query'] = {
     limit: 20,
     sortBy: '1DayVolume',
+    normalizeRoyalties: true,
   }
 
   if (COLLECTION && !COMMUNITY) query.contract = [COLLECTION]
